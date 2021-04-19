@@ -1,0 +1,44 @@
+paths:
+  #carbonapi: "../../go-graphite/carbonapi/carbonapi"
+  carbon_clickhouse: "../../lomik/carbon-clickhouse/carbon-clickhouse"
+  graphite_clickhouse: "../../lomik/graphite-clickhouse/graphite-clickhouse"
+  #clickhouse_docker: ""
+  #docker: "docker"
+clickhouse:
+  - dir: "clickhouse/rollup"
+    version: "20.8.12.2"
+  # - dir: "clickhouse/rollup-10s"
+  #   version: "20.8.12.2"
+input:
+  carbon_clickhouse: "carbon-clickhouse.conf"
+  metrics:
+    - "test.metric"
+    - "test.metric2.sum"
+    - "test.metric2.min"
+    - "test.metric2.max"
+  from: -24h
+  until: 0s
+  step: 10s
+tests:
+  - 
+    graphite_clickhouse: "graphite-clickhouse-noreverse-unaggr.conf"
+    formats:
+      - "pickle"
+    from: -240s
+    until: -120s
+    targets:
+      - "test.metric"
+      - "test.metric2.sum"
+    result:
+      "test.metric":
+        step: 60s
+        aggregation: "avg"
+      "test.metric2.sum":
+        step: 60s
+        aggregation: "sum"
+        
+  # - graphite_clickhouse: "graphite-clickhouse-noreverse-aggr.conf"
+  # - graphite_clickhouse: "graphite-clickhouse-reverse-unaggr.conf"
+  # - graphite_clickhouse: "graphite-clickhouse-reverse-aggr.conf"
+  # - graphite_clickhouse: "graphite-clickhouse-unaggr.conf"
+  # - graphite_clickhouse: "graphite-clickhouse-aggr.conf"
