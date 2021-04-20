@@ -302,7 +302,7 @@ func runTest(cfg *TestConfig) bool {
 
 				if metricsUploaded {
 					// wait for upload metrics
-					time.Sleep(20 * time.Second)
+					time.Sleep(10 * time.Second)
 
 					for _, t := range cfg.Tests {
 						if gCh, err := GraphiteClickhouseStart(cfg.Paths.GraphiteClickhouse, t.Gch, cfg.Dir, db.address,
@@ -312,7 +312,7 @@ func runTest(cfg *TestConfig) bool {
 								zap.String("command", cfg.Paths.GraphiteClickhouse+" -config "+gCh.configFile),
 							)
 
-							time.Sleep(2 * time.Second)
+							time.Sleep(1 * time.Second)
 							param := gchreader.RequestParam{
 								From:          now + t.From.Duration().Milliseconds()/(1000*60)*60,
 								Until:         now + t.Until.Duration().Milliseconds()/(1000*60)*60,
@@ -330,6 +330,8 @@ func runTest(cfg *TestConfig) bool {
 									succesTest = false
 									logger.Error("Unsupported graphite-clickhouse response format",
 										zap.String("format", format),
+										zap.String("from", t.From.Duration().String()),
+										zap.String("until", t.Until.Duration().String()),
 										zap.String("graphite-clickhouse", t.Gch),
 										zap.String("command", cfg.Paths.GraphiteClickhouse+" -config "+gCh.configFile),
 										zap.Error(err),
@@ -340,6 +342,9 @@ func runTest(cfg *TestConfig) bool {
 									if mismatch, diff := gchreader.VerifyQueryResults(result, verifyResults, param.From, param.Until); mismatch {
 										succesTest = false
 										logger.Error("query",
+											zap.String("format", format),
+											zap.String("from", t.From.Duration().String()),
+											zap.String("until", t.Until.Duration().String()),
 											zap.String("graphite-clickhouse", t.Gch),
 											zap.String("command", cfg.Paths.GraphiteClickhouse+" -config "+gCh.configFile),
 											zap.Any("param", param),
@@ -351,6 +356,9 @@ func runTest(cfg *TestConfig) bool {
 										}
 									} else {
 										logger.Info("query",
+											zap.String("format", format),
+											zap.String("from", t.From.Duration().String()),
+											zap.String("until", t.Until.Duration().String()),
 											zap.String("graphite-clickhouse", t.Gch),
 											zap.String("status", "done"),
 											zap.Any("query", qInfo),
@@ -358,6 +366,9 @@ func runTest(cfg *TestConfig) bool {
 									}
 								} else {
 									logger.Error("query",
+										zap.String("format", format),
+										zap.String("from", t.From.Duration().String()),
+										zap.String("until", t.Until.Duration().String()),
 										zap.String("graphite-clickhouse", t.Gch),
 										zap.String("command", cfg.Paths.GraphiteClickhouse+" -config "+gCh.configFile),
 										zap.Any("param", param),

@@ -16,12 +16,17 @@ input:
     - "test.metric2.sum"
     - "test.metric2.min"
     - "test.metric2.max"
+    - "metric;scope=test1"
+    - "metric;scope=test2"
+    - "metric;scope=test3"
+    - "metric2.sum;scope=test4"
+    - "metric2.min;scope=test4"
+    - "metric2.max;scope=test4"
   from: -32h
   until: 0s
   step: 10s
 tests:
-  - 
-    graphite_clickhouse: "graphite-clickhouse-noreverse-unaggr.conf"
+  - graphite_clickhouse: "graphite-clickhouse-noreverse-unaggr.conf"
     formats:
       - "pickle"
     from: -240s
@@ -29,6 +34,8 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 60s
@@ -36,18 +43,35 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
+
+  - graphite_clickhouse: "graphite-clickhouse-noreverse-unaggr.conf"        
     from: -30h
     until: -29h
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 600s
         aggregation: "avg"
       "test.metric2.sum":
         step: 600s
-        aggregation: "sum"        
+        aggregation: "sum"
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
+
   - graphite_clickhouse: "graphite-clickhouse-noreverse-aggr.conf"
     formats:
       - "pickle"
@@ -56,6 +80,8 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 60s
@@ -63,11 +89,21 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
+
+  - graphite_clickhouse: "graphite-clickhouse-noreverse-aggr.conf"        
     from: -30h
     until: -29h
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 600s
@@ -75,6 +111,12 @@ tests:
       "test.metric2.sum":
         step: 600s
         aggregation: "sum"        
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
 
   - graphite_clickhouse: "graphite-clickhouse-reverse-unaggr.conf"
     formats:
@@ -84,6 +126,8 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 60s
@@ -91,11 +135,21 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
+
+  - graphite_clickhouse: "graphite-clickhouse-reverse-unaggr.conf"
     from: -30h
     until: -29h
     targets:
       - "test.metric"
       - "test.metric2.sum"
+      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
         step: 600s
@@ -103,6 +157,12 @@ tests:
       "test.metric2.sum":
         step: 600s
         aggregation: "sum"        
+      # "metric?scope=test1":
+      #   step: 60s
+      #   aggregation: "avg"
+      "metric;scope=test3":
+        step: 60s
+        aggregation: "avg"
   
 ### !!! No rollup rules for reverse        
   # - graphite_clickhouse: "graphite-clickhouse-reverse-aggr.conf"
