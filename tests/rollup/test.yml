@@ -34,7 +34,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -43,9 +43,12 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"        
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
@@ -56,7 +59,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -65,9 +68,12 @@ tests:
       "test.metric2.sum":
         step: 600s
         aggregation: "sum"
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
@@ -80,7 +86,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -89,9 +95,12 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
@@ -102,7 +111,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -111,9 +120,12 @@ tests:
       "test.metric2.sum":
         step: 600s
         aggregation: "sum"        
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
@@ -126,7 +138,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -135,9 +147,12 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
@@ -148,7 +163,7 @@ tests:
     targets:
       - "test.metric"
       - "test.metric2.sum"
-      - "seriesByTag('name=metric', 'scope=test{1|2}')" # Bug in graphite-clickhouse
+      - "seriesByTag('name=metric', 'scope=test{1,2}')" # Bug in graphite-clickhouse
       - "seriesByTag('name=metric', 'scope=test3')"
     result:
       "test.metric":
@@ -157,9 +172,12 @@ tests:
       "test.metric2.sum":
         step: 600s
         aggregation: "sum"        
-      # "metric?scope=test1":
-      #   step: 60s
-      #   aggregation: "avg"
+      "metric;scope=test1":
+        step: 60s
+        aggregation: "avg"
+      "metric;scope=test2":
+        step: 60s
+        aggregation: "avg"      	
       "metric;scope=test3":
         step: 60s
         aggregation: "avg"
