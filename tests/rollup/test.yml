@@ -16,7 +16,7 @@ input:
     - "test.metric2.sum"
     - "test.metric2.min"
     - "test.metric2.max"
-  from: -24h
+  from: -32h
   until: 0s
   step: 10s
 tests:
@@ -36,9 +36,96 @@ tests:
       "test.metric2.sum":
         step: 60s
         aggregation: "sum"
-        
-  # - graphite_clickhouse: "graphite-clickhouse-noreverse-aggr.conf"
-  # - graphite_clickhouse: "graphite-clickhouse-reverse-unaggr.conf"
+    from: -30h
+    until: -29h
+    targets:
+      - "test.metric"
+      - "test.metric2.sum"
+    result:
+      "test.metric":
+        step: 600s
+        aggregation: "avg"
+      "test.metric2.sum":
+        step: 600s
+        aggregation: "sum"        
+  - graphite_clickhouse: "graphite-clickhouse-noreverse-aggr.conf"
+    formats:
+      - "pickle"
+    from: -240s
+    until: -120s
+    targets:
+      - "test.metric"
+      - "test.metric2.sum"
+    result:
+      "test.metric":
+        step: 60s
+        aggregation: "avg"
+      "test.metric2.sum":
+        step: 60s
+        aggregation: "sum"
+
+  - graphite_clickhouse: "graphite-clickhouse-reverse-unaggr.conf"
+    formats:
+      - "pickle"
+    from: -240s
+    until: -120s
+    targets:
+      - "test.metric"
+      - "test.metric2.sum"
+    result:
+      "test.metric":
+        step: 60s
+        aggregation: "avg"
+      "test.metric2.sum":
+        step: 60s
+        aggregation: "sum"
+  
+### !!! No rollup rules for reverse        
   # - graphite_clickhouse: "graphite-clickhouse-reverse-aggr.conf"
+  #   formats:
+  #     - "pickle"
+  #   from: -240s
+  #   until: -120s
+  #   targets:
+  #     - "test.metric"
+  #     - "test.metric2.sum"
+  #   result:
+  #     "test.metric":
+  #       step: 60s
+  #       aggregation: "avg"
+  #     "test.metric2.sum":
+  #       step: 60s
+  #       aggregation: "sum"
+
   # - graphite_clickhouse: "graphite-clickhouse-unaggr.conf"
+  #   formats:
+  #     - "pickle"
+  #   from: -240s
+  #   until: -120s
+  #   targets:
+  #     - "test.metric"
+  #     - "test.metric2.sum"
+  #   result:
+  #     "test.metric":
+  #       step: 60s
+  #       aggregation: "avg"
+  #     "test.metric2.sum":
+  #       step: 60s
+  #       aggregation: "sum"
+
   # - graphite_clickhouse: "graphite-clickhouse-aggr.conf"
+  #   formats:
+  #     - "pickle"
+  #   from: -240s
+  #   until: -120s
+  #   targets:
+  #     - "test.metric"
+  #     - "test.metric2.sum"
+  #   result:
+  #     "test.metric":
+  #       step: 60s
+  #       aggregation: "avg"
+  #     "test.metric2.sum":
+  #       step: 60s
+  #       aggregation: "sum"
+

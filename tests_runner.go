@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 
+	"github.com/lomik/graphite-clickhouse/pkg/dry"
 	"github.com/msaf1980/go-yamladdons"
 	gchreader "github.com/msaf1980/graphite-clickhouse-test/graphite-clickhouse"
 )
@@ -105,6 +106,14 @@ type TestConfig struct {
 }
 
 func roundTimestap(from int64, step int64) int64 {
+	result := from - (from % step)
+	if result < from {
+		return result + step
+	}
+	return result
+}
+
+func truncateTimestap(from int64, step int64) int64 {
 	return from - (from % step)
 }
 
@@ -131,32 +140,49 @@ func rollup(name string, points []Point, from, until, step int64, aggr Aggregati
 	if step == 0 {
 		return nil, 0, 0
 	}
-	from = roundTimestap(from, step) - step
-	until = roundTimestap(until, step)
-	count := (until - from) / step
+	from = dry.CeilToMultiplier(from, step) - step
+	until = dry.FloorToMultiplier(until, step) + 2*step - 1
+	count := (until-from)/step + 2
 	rPoints := make([]float64, count)
 	i := 0
 	n := 0
 	a := math.NaN()
-	start := from
-	end := start + step
+	var startFrom int64 = -1
+	var endUntil int64
+	var end int64
 	for _, p := range points {
 		if name != p.Name {
 			continue
 		}
-		if p.Timestamp <= from {
+		if p.Timestamp < from {
 			continue
 		}
 		if p.Timestamp > until {
 			break
 		}
-		if p.Timestamp > end {
+		if startFrom == -1 {
+			// k := j - 64
+			// if k < 0 {
+			// 	k = 0
+			// }
+			// for i := k; i < j; i++ {
+			// 	if name != points[i].Name {
+			// 		continue
+			// 	}
+			// 	fmt.Printf("-- {\"%s\", %.2f, %d},\n", points[i].Name, points[i].Value, points[i].Timestamp)
+			// }
+			startFrom = dry.FloorToMultiplier(p.Timestamp, step)
+			end = startFrom + step
+		}
+		if p.Timestamp >= end && n > 0 {
 			rollupFlush(a, n, aggr, &rPoints, &i)
-			start = end
+			//fmt.Printf("%s [%d] %f\n", name, end, rPoints[i-1])
+			endUntil = end
 			end += step
 			n = 0
 			a = math.NaN()
 		}
+		//fmt.Printf("{\"%s\", %.2f, %d},\n", p.Name, p.Value, p.Timestamp)
 		n++
 		if math.IsNaN(p.Value) {
 			continue
@@ -179,7 +205,11 @@ func rollup(name string, points []Point, from, until, step int64, aggr Aggregati
 		}
 	}
 	rollupFlush(a, n, aggr, &rPoints, &i)
-	return rPoints[0:i], from + step, until
+	// if n > 0 {
+	// 	fmt.Printf("%s [%d] %f\n", name, end, rPoints[i-1])
+	// }
+	endUntil = end
+	return rPoints[0:i], startFrom, endUntil
 }
 
 func convertQueryResult(t *TestSchema, now int64, points []Point) gchreader.QueryResult {
@@ -187,8 +217,9 @@ func convertQueryResult(t *TestSchema, now int64, points []Point) gchreader.Quer
 
 	for name, tResult := range t.Result {
 		step := tResult.Step.Duration().Microseconds() / 1000000
-		from := roundTimestap(now+t.From.Duration().Microseconds()/1000000, step) + step
-		until := roundTimestap(now+t.Until.Duration().Microseconds()/1000000, step) + step
+		from := dry.CeilToMultiplier(now+t.From.Duration().Microseconds()/1000000, step)
+		//until := dry.FloorToMultiplier(now+t.Until.Duration().Microseconds()/1000000, step) + step
+		until := dry.CeilToMultiplier(now+t.Until.Duration().Microseconds()/1000000, step) + step
 		var pp []float64
 		pp, from, until = rollup(name, points, from, until, step, tResult.Aggregation)
 		r := &gchreader.TargetResult{
@@ -271,7 +302,7 @@ func runTest(cfg *TestConfig) bool {
 
 				if metricsUploaded {
 					// wait for upload metrics
-					time.Sleep(15 * time.Second)
+					time.Sleep(20 * time.Second)
 
 					for _, t := range cfg.Tests {
 						if gCh, err := GraphiteClickhouseStart(cfg.Paths.GraphiteClickhouse, t.Gch, cfg.Dir, db.address,
@@ -306,7 +337,7 @@ func runTest(cfg *TestConfig) bool {
 									continue
 								}
 								if err == nil {
-									if mismatch, diff := gchreader.VerifyQueryResults(result, verifyResults); mismatch {
+									if mismatch, diff := gchreader.VerifyQueryResults(result, verifyResults, param.From, param.Until); mismatch {
 										succesTest = false
 										logger.Error("query",
 											zap.String("graphite-clickhouse", t.Gch),
